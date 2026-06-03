@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis GRC | Risk Heatmap</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Styling headers for axis */
+    .heatmap-axis-y {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: flex-end;
+      padding-right: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      height: 400px;
+    }
+    .heatmap-axis-x {
+      display: flex;
+      justify-content: space-around;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-left: 108px;
+      max-width: 592px;
+      padding-top: 8px;
+    }
+    .axis-y-item {
+      height: 80px;
+      display: flex;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Animation -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <p style="margin-top: 16px; font-weight: 500; font-size: 0.85rem; color: var(--text-secondary); letter-spacing: 0.5px;">SECURING GRC ENCLAVE...</p>
+  </div>
+
+  <div class="app-container">
+    <!-- Sidebar navigation slot -->
+    <div id="sidebar-container"></div>
+
+    <main class="main-content">
+      <!-- Header slot -->
+      <div id="header-container"></div>
+
+      <!-- Department Filter Bar -->
+      <section class="filter-bar">
+        <div class="filter-group">
+          <label for="heatmap-dept-filter">Filter Heatmap by Department</label>
+          <select id="heatmap-dept-filter" class="select-input">
+            <option value="All">All Departments</option>
+          </select>
+        </div>
+        <div style="flex-grow: 1; text-align: right; font-size: 0.8rem; color: var(--text-secondary);">
+          Hover cells to view mapped risk descriptions. Click cells to filter register.
+        </div>
+      </section>
+
+      <!-- Heatmap Panel -->
+      <section class="heatmap-container">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h2 style="font-size: 1.15rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-primary);">Likelihood &amp; Impact Risk Matrix (5x5)</h2>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Corresponds to active open risks in the register</p>
+        </div>
+
+        <div style="display: flex; justify-content: center; align-items: center; min-height: 480px; position:relative;">
+          <div class="heatmap-layout">
+            <!-- Y-Axis Label -->
+            <div class="heatmap-y-label">
+              Likelihood (Rare &rarr; Almost Certain)
+            </div>
+
+            <!-- Matrix content and axes -->
+            <div style="display: flex;">
+              <!-- Y Axis Indicators -->
+              <div class="heatmap-axis-y">
+                <div class="axis-y-item">5 - Almost Certain</div>
+                <div class="axis-y-item">4 - Likely</div>
+                <div class="axis-y-item">3 - Moderate</div>
+                <div class="axis-y-item">2 - Unlikely</div>
+                <div class="axis-y-item">1 - Rare</div>
+              </div>
+
+              <!-- 5x5 Matrix cells -->
+              <div class="heatmap-matrix" id="heatmap-cells-grid">
+                <!-- Injected dynamically by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- X Axis Indicators -->
+        <div class="heatmap-axis-x">
+          <div>1 - Insignificant</div>
+          <div>2 - Minor</div>
+          <div>3 - Moderate</div>
+          <div>4 - Major</div>
+          <div>5 - Critical</div>
+        </div>
+
+        <div class="heatmap-axis-x" style="margin-top: 4px; font-weight:700; color: var(--text-secondary); text-transform:uppercase; letter-spacing:1px;">
+          Impact (Insignificant &rarr; Critical)
+        </div>
+
+        <!-- Legend -->
+        <div class="heatmap-legend">
+          <div class="legend-item">
+            <div class="legend-color cell-low"></div>
+            <span>Low Risk (Score 1-4)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color cell-medium"></div>
+            <span>Medium Risk (Score 5-9)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color cell-high"></div>
+            <span>High Risk (Score 10-15)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color cell-critical"></div>
+            <span>Critical Risk (Score 16-25)</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Tooltip overlay -->
+  <div id="heatmap-tooltip-panel" class="heatmap-tooltip">
+    <div class="heatmap-tooltip-title" id="tooltip-cell-coord">Coordinate (0, 0)</div>
+    <ul class="heatmap-tooltip-list" id="tooltip-risks-list">
+      <!-- Injected list -->
+    </ul>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    let grcData = {};
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Inject global layout
+      injectGlobalLayout('Risk Heatmap Matrix');
+
+      // Load database state
+      grcData = await initDatabase();
+
+      // Populate department filter select
+      populateDepartmentSelect();
+
+      // Setup filter action
+      document.getElementById('heatmap-dept-filter').addEventListener('change', renderHeatmap);
+
+      // Render Matrix
+      renderHeatmap();
+    });
+
+    function populateDepartmentSelect() {
+      const select = document.getElementById('heatmap-dept-filter');
+      const depts = grcData.departments || [];
+      depts.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.DepartmentID;
+        opt.innerText = d.Name;
+        select.appendChild(opt);
+      });
+    }
+
+    /**
+     * Renders the 5x5 Heatmap cells
+     */
+    function renderHeatmap() {
+      const grid = document.getElementById('heatmap-cells-grid');
+      const deptFilter = document.getElementById('heatmap-dept-filter').value;
+      const risks = grcData.risks || [];
+
+      // Filter risks that are open and match department filter
+      const activeRisks = risks.filter(r => {
+        const isOpen = r.Status === 'Open';
+        const matchesDept = deptFilter === 'All' || r.Department === deptFilter;
+        return isOpen && matchesDept;
+      });
+
+      // Clear grid
+      grid.innerHTML = '';
+
+      // Generate grid cells: Y-axis (Likelihood 5 to 1), X-axis (Impact 1 to 5)
+      for (let likelihood = 5; likelihood >= 1; likelihood--) {
+        for (let impact = 1; impact <= 5; impact++) {
+          const score = likelihood * impact;
+          
+          // Determine risk level class
+          let cellClass = 'cell-low';
+          let levelText = 'Low';
+          if (score >= 16) { cellClass = 'cell-critical'; levelText = 'Critical'; }
+          else if (score >= 10) { cellClass = 'cell-high'; levelText = 'High'; }
+          else if (score >= 5) { cellClass = 'cell-medium'; levelText = 'Medium'; }
+
+          // Count matching risks
+          const cellRisks = activeRisks.filter(r => 
+            parseInt(r.Likelihood) === likelihood && parseInt(r.Impact) === impact
+          );
+          
+          const count = cellRisks.length;
+
+          // Create cell DOM element
+          const cell = document.createElement('div');
+          cell.className = `heatmap-cell ${cellClass}`;
+          cell.setAttribute('data-likelihood', likelihood);
+          cell.setAttribute('data-impact', impact);
+          
+          cell.innerHTML = `
+            <span class="cell-count">${count > 0 ? count : '-'}</span>
+            <span class="cell-label">${count > 0 ? levelText : ''}</span>
+          `;
+
+          // Event listeners for custom tooltip
+          if (count > 0) {
+            cell.addEventListener('mouseenter', (e) => showTooltip(e, likelihood, impact, cellRisks));
+            cell.addEventListener('mousemove', moveTooltip);
+            cell.addEventListener('mouseleave', hideTooltip);
+            cell.addEventListener('click', () => {
+              // Redirect to risks register filtering by severity/score coordinates
+              window.location.href = `risks.html?search=&dept=${deptFilter}&status=Open`;
+            });
+          }
+
+          grid.appendChild(cell);
+        }
+      }
+    }
+
+    /**
+     * Show custom absolute tooltip
+     */
+    function showTooltip(e, likelihood, impact, cellRisks) {
+      const tooltip = document.getElementById('heatmap-tooltip-panel');
+      const coordTitle = document.getElementById('tooltip-cell-coord');
+      const list = document.getElementById('tooltip-risks-list');
+
+      coordTitle.innerText = `Likelihood ${likelihood} x Impact ${impact} (${cellRisks.length} Risks)`;
+      
+      list.innerHTML = cellRisks.map(r => `
+        <li style="margin-bottom:6px;">
+          <strong style="color:var(--color-accent);">${r.RiskID}:</strong> 
+          ${r.Title} 
+          <span style="color:var(--text-muted); font-size:0.7rem;">(Score: ${r.RiskScore})</span>
+        </li>
+      `).join('');
+
+      tooltip.style.display = 'block';
+      moveTooltip(e);
+    }
+
+    function moveTooltip(e) {
+      const tooltip = document.getElementById('heatmap-tooltip-panel');
+      // Position offset
+      tooltip.style.left = `${e.pageX + 15}px`;
+      tooltip.style.top = `${e.pageY + 15}px`;
+    }
+
+    function hideTooltip() {
+      const tooltip = document.getElementById('heatmap-tooltip-panel');
+      tooltip.style.display = 'none';
+    }
+  </script>
+</body>
+</html>

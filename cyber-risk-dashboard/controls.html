@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis GRC | Controls Catalog</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Effectiveness progress meter */
+    .meter-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .meter-label {
+      width: 110px;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    .meter-bar {
+      flex-grow: 1;
+      height: 8px;
+      background-color: var(--bg-surface-elevated);
+      border-radius: 4px;
+      overflow: hidden;
+      max-width: 150px;
+    }
+    .meter-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Animation -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <p style="margin-top: 16px; font-weight: 500; font-size: 0.85rem; color: var(--text-secondary); letter-spacing: 0.5px;">SECURING GRC ENCLAVE...</p>
+  </div>
+
+  <div class="app-container">
+    <!-- Sidebar navigation slot -->
+    <div id="sidebar-container"></div>
+
+    <main class="main-content">
+      <!-- Header slot -->
+      <div id="header-container"></div>
+
+      <!-- Controls Summary Cards -->
+      <section class="kpi-grid">
+        <div class="kpi-card" data-type="total">
+          <div class="kpi-details">
+            <h3>Total Controls Library</h3>
+            <div class="kpi-value" id="stats-total">-</div>
+            <div class="kpi-change down">
+              <span>Enterprise Standards</span>
+            </div>
+          </div>
+          <div class="kpi-icon-wrapper">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          </div>
+        </div>
+
+        <div class="kpi-card" data-type="compliance">
+          <div class="kpi-details">
+            <h3>Effective Controls</h3>
+            <div class="kpi-value" id="stats-effective">-</div>
+            <div class="kpi-change down" id="stats-effective-pct">
+              <span>-% Pass Rating</span>
+            </div>
+          </div>
+          <div class="kpi-icon-wrapper">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+        </div>
+
+        <div class="kpi-card" data-type="findings">
+          <div class="kpi-details">
+            <h3>Partially Effective</h3>
+            <div class="kpi-value" id="stats-partial">-</div>
+            <div class="kpi-change" style="color: var(--color-medium)">
+              <span>Action Required</span>
+            </div>
+          </div>
+          <div class="kpi-icon-wrapper">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          </div>
+        </div>
+
+        <div class="kpi-card" data-type="high">
+          <div class="kpi-details">
+            <h3>Failed / Ineffective</h3>
+            <div class="kpi-value" id="stats-ineffective">-</div>
+            <div class="kpi-change" style="color: var(--color-critical)">
+              <span>Audit Deficiencies</span>
+            </div>
+          </div>
+          <div class="kpi-icon-wrapper">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters Panel -->
+      <section class="filter-bar">
+        <div class="search-input-wrapper">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" id="control-search" class="search-input" placeholder="Search controls by ID, name, or framework...">
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-framework">Framework</label>
+          <select id="filter-framework" class="select-input">
+            <option value="All">All Frameworks</option>
+            <option value="NIST CSF">NIST CSF</option>
+            <option value="ISO 27001">ISO 27001</option>
+            <option value="SOC 2">SOC 2</option>
+            <option value="CIS Controls">CIS Controls</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-effectiveness">Effectiveness</label>
+          <select id="filter-effectiveness" class="select-input">
+            <option value="All">All Ratings</option>
+            <option value="Effective">Effective</option>
+            <option value="Partially Effective">Partially Effective</option>
+            <option value="Ineffective">Ineffective</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Controls Table Register -->
+      <section class="register-card">
+        <div class="grc-table-container">
+          <table class="grc-table">
+            <thead>
+              <tr>
+                <th style="cursor: pointer;" onclick="toggleSort('ControlID')">Control ID <span id="sort-ControlID">↕</span></th>
+                <th style="cursor: pointer;" onclick="toggleSort('ControlName')">Control Name <span id="sort-ControlName">↕</span></th>
+                <th style="cursor: pointer;" onclick="toggleSort('Framework')">Framework <span id="sort-Framework">↕</span></th>
+                <th style="cursor: pointer;" onclick="toggleSort('Effectiveness')">Effectiveness <span id="sort-Effectiveness">↕</span></th>
+                <th style="cursor: pointer;" onclick="toggleSort('OwnerDepartment')">Owner Department <span id="sort-OwnerDepartment">↕</span></th>
+              </tr>
+            </thead>
+            <tbody id="controls-table-body">
+              <!-- JS Injected rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Table Pagination -->
+        <div class="pagination">
+          <div id="pagination-info">Showing 0-0 of 0 entries</div>
+          <div class="pagination-controls">
+            <button class="pagination-btn" id="prev-page-btn" disabled>Previous</button>
+            <button class="pagination-btn" id="next-page-btn" disabled>Next</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/controls.js"></script>
+</body>
+</html>

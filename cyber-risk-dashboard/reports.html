@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis GRC | Reports &amp; Compliance</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Export cards layout */
+    .export-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .export-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: border-color 0.2s;
+    }
+    .export-card:hover {
+      border-color: rgba(6, 182, 212, 0.3);
+    }
+    .export-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .export-icon {
+      width: 24px;
+      height: 24px;
+      color: var(--color-accent);
+    }
+    .export-title {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .export-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+
+    /* Simulation modal */
+    .progress-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .progress-box {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      padding: 40px;
+      width: 90%;
+      max-width: 450px;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+    }
+    .progress-track {
+      height: 6px;
+      background-color: var(--bg-surface-elevated);
+      border-radius: 3px;
+      width: 100%;
+      overflow: hidden;
+      margin: 24px 0 12px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--color-primary), var(--color-accent));
+      width: 0;
+      transition: width 0.1s linear;
+    }
+    .progress-status {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Animation -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <p style="margin-top: 16px; font-weight: 500; font-size: 0.85rem; color: var(--text-secondary); letter-spacing: 0.5px;">SECURING GRC ENCLAVE...</p>
+  </div>
+
+  <div class="app-container">
+    <!-- Sidebar navigation slot -->
+    <div id="sidebar-container"></div>
+
+    <main class="main-content">
+      <!-- Header slot -->
+      <div id="header-container"></div>
+
+      <!-- Framework Compliance Targets -->
+      <section style="margin-bottom: 20px;">
+        <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:16px;">Regulatory Compliance Standings</h2>
+        <div class="framework-list" id="framework-list-container">
+          <!-- NIST CSF -->
+          <div class="framework-card">
+            <div class="framework-header">
+              <span class="framework-title">NIST CSF v2.0</span>
+              <span class="framework-badge">Cyber Security Framework</span>
+            </div>
+            <div class="framework-score-box">
+              <span class="framework-score" id="score-nist">0%</span>
+              <span class="framework-score-label">mapped alignment</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fg" id="bar-nist"></div>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Based on NIST Core Identify, Protect, Detect, Respond mappings.</p>
+          </div>
+
+          <!-- ISO 27001 -->
+          <div class="framework-card">
+            <div class="framework-header">
+              <span class="framework-title">ISO/IEC 27001:2022</span>
+              <span class="framework-badge">Information Security standard</span>
+            </div>
+            <div class="framework-score-box">
+              <span class="framework-score" id="score-iso">0%</span>
+              <span class="framework-score-label">mapped controls</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fg" id="bar-iso"></div>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Maps internal controls to Annex A security directives.</p>
+          </div>
+
+          <!-- SOC 2 -->
+          <div class="framework-card">
+            <div class="framework-header">
+              <span class="framework-title">AICPA SOC 2 Type II</span>
+              <span class="framework-badge">Trust Service Criteria</span>
+            </div>
+            <div class="framework-score-box">
+              <span class="framework-score" id="score-soc2">0%</span>
+              <span class="framework-score-label">effective audits</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fg" id="bar-soc2"></div>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Assesses Security, Availability, Confidentially criteria.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Export Center -->
+      <section>
+        <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:16px;">GRC Export &amp; Reporting Center</h2>
+        <div class="export-grid">
+          <!-- Board Report -->
+          <div class="export-card">
+            <div>
+              <div class="export-header">
+                <svg class="export-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                <h3 class="export-title">Executive Board Briefing (PDF)</h3>
+              </div>
+              <p class="export-desc">Consolidated reporting summarizing top vulnerabilities, cumulative compliance standings, and remediation paths for senior leadership stakeholders.</p>
+            </div>
+            <button class="btn-primary" onclick="simulateExport('pdf', 'Board_Briefing_Report')">Generate Board Report</button>
+          </div>
+
+          <!-- Risk Data CSV -->
+          <div class="export-card">
+            <div>
+              <div class="export-header">
+                <svg class="export-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                <h3 class="export-title">Complete Risk Register (CSV)</h3>
+              </div>
+              <p class="export-desc">Raw CSV export of the current active risk inventory database mapping coordinates, scores, status, and description fields.</p>
+            </div>
+            <button class="btn-primary" onclick="triggerCSVExport('risks')">Export Risks Inventory</button>
+          </div>
+
+          <!-- Findings Audit CSV -->
+          <div class="export-card">
+            <div>
+              <div class="export-header">
+                <svg class="export-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <h3 class="export-title">Audit Remediation Register (CSV)</h3>
+              </div>
+              <p class="export-desc">Extract audit details, findings, severity badges, and remediation due dates to support regulator and external auditor reviews.</p>
+            </div>
+            <button class="btn-primary" onclick="triggerCSVExport('findings')">Export Findings Log</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Simulated progress overlay -->
+  <div class="progress-overlay" id="export-progress-overlay">
+    <div class="progress-box">
+      <h3 style="font-size: 1.15rem; font-weight:700;" id="progress-title">Initiating GRC Ledger Extract</h3>
+      <div class="progress-track">
+        <div class="progress-fill" id="export-progress-bar"></div>
+      </div>
+      <p class="progress-status" id="progress-status-lbl">Reading localized memory state...</p>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    let grcData = {};
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Inject global layout
+      injectGlobalLayout('Reports & Compliance Governance');
+
+      // Load database state
+      grcData = await initDatabase();
+
+      // Compute and animate compliance ratings
+      calculateComplianceScores();
+    });
+
+    /**
+     * Calculates percentages of effective controls matching frameworks
+     */
+    function calculateComplianceScores() {
+      const controls = grcData.controls || [];
+      
+      const frameworks = {
+        'NIST CSF': { total: 0, effective: 0 },
+        'ISO 27001': { total: 0, effective: 0 },
+        'SOC 2': { total: 0, effective: 0 }
+      };
+
+      controls.forEach(c => {
+        if (frameworks[c.Framework]) {
+          frameworks[c.Framework].total++;
+          if (c.Effectiveness === 'Effective') {
+            frameworks[c.Framework].effective++;
+          }
+        }
+      });
+
+      // Calculate scores
+      const nistScore = calculatePercentage(frameworks['NIST CSF'].effective, frameworks['NIST CSF'].total);
+      const isoScore = calculatePercentage(frameworks['ISO 27001'].effective, frameworks['ISO 27001'].total);
+      const socScore = calculatePercentage(frameworks['SOC 2'].effective, frameworks['SOC 2'].total);
+
+      // Animate badges & progress bar widths
+      animateScore('nist', nistScore);
+      animateScore('iso', isoScore);
+      animateScore('soc2', socScore);
+    }
+
+    function calculatePercentage(eff, tot) {
+      return tot > 0 ? Math.round((eff / tot) * 100) : 0;
+    }
+
+    function animateScore(id, targetVal) {
+      const scoreLbl = document.getElementById(`score-${id}`);
+      const progressBar = document.getElementById(`bar-${id}`);
+      
+      setTimeout(() => {
+        scoreLbl.innerText = `${targetVal}%`;
+        progressBar.style.width = `${targetVal}%`;
+      }, 200);
+    }
+
+    /**
+     * Generates downloadable CSV dynamically from current local storage data
+     */
+    function triggerCSVExport(type) {
+      const overlay = document.getElementById('export-progress-overlay');
+      const progressBar = document.getElementById('export-progress-bar');
+      const title = document.getElementById('progress-title');
+      const status = document.getElementById('progress-status-lbl');
+
+      title.innerText = `Compiling GRC data for: ${type.toUpperCase()}`;
+      overlay.style.display = 'flex';
+      progressBar.style.width = '0%';
+
+      let progress = 0;
+      const steps = [
+        "Resolving local database indices...",
+        "Serializing CSV fields...",
+        "Building text streams...",
+        "Signing audit compliance hash...",
+        "Completed! Triggering local file save."
+      ];
+
+      const interval = setInterval(() => {
+        progress += 20;
+        progressBar.style.width = `${progress}%`;
+        status.innerText = steps[Math.floor(progress / 20) - 1] || 'Done';
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            // Actually build and download the CSV!
+            saveCSVFile(type);
+          }, 400);
+        }
+      }, 200);
+    }
+
+    function saveCSVFile(type) {
+      const dataArray = grcData[type];
+      if (!dataArray || dataArray.length === 0) return;
+
+      // Extract headers
+      const headers = Object.keys(dataArray[0]);
+      let csvContent = headers.join(',') + '\r\n';
+
+      // Map rows
+      dataArray.forEach(row => {
+        const escapedValues = headers.map(header => {
+          let cellValue = row[header] || '';
+          // Wrap in quotes if it contains commas or quotes
+          if (cellValue.includes(',') || cellValue.includes('"')) {
+            cellValue = `"${cellValue.replace(/"/g, '""')}"`;
+          }
+          return cellValue;
+        });
+        csvContent += escapedValues.join(',') + '\r\n';
+      });
+
+      // Create download link
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Aegis_GRC_Export_${type}_2026-05-24.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    /**
+     * Simulated board briefing download
+     */
+    function simulateExport(format, filename) {
+      const overlay = document.getElementById('export-progress-overlay');
+      const progressBar = document.getElementById('export-progress-bar');
+      const title = document.getElementById('progress-title');
+      const status = document.getElementById('progress-status-lbl');
+
+      title.innerText = "Compiling Executive Board PDF Brief";
+      overlay.style.display = 'flex';
+      progressBar.style.width = '0%';
+
+      let progress = 0;
+      const steps = [
+        "Connecting to GRC secure records...",
+        "Compiling risk exposure histograms...",
+        "Summarizing control effectiveness metrics...",
+        "Rendering PDF vector canvas layout...",
+        "Finalizing document encryption. Downloading..."
+      ];
+
+      const interval = setInterval(() => {
+        progress += 20;
+        progressBar.style.width = `${progress}%`;
+        status.innerText = steps[Math.floor(progress / 20) - 1] || 'Done';
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            // Download mock empty text document pretending to be PDF
+            const mockPDF = "%PDF-1.4\n%AEGIS GRC SECURE REPORT EXTRACT\n2026-05-24";
+            const blob = new Blob([mockPDF], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${filename}_2026-05-24.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }, 400);
+        }
+      }, 250);
+    }
+  </script>
+</body>
+</html>

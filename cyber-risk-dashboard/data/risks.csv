@@ -1,0 +1,11 @@
+RiskID,Title,Department,Likelihood,Impact,RiskScore,Status,Description
+RSK01,Unauthorized Production Database Access,DEP02,4,5,20,Open,Developer credentials stored in plaintext in local config files could lead to database exposure and customer PII theft.
+RSK02,Phishing Campaign Targeting Finance,DEP03,5,4,20,Open,Spear-phishing emails targeting treasury team to bypass approval controls and authorize fraudulent wire transfers.
+RSK03,Outdated SSL/TLS Certificates on API Gateway,DEP01,3,4,12,Open,Expired or weak cryptographic protocols on legacy customer-facing API endpoints vulnerable to man-in-the-middle attacks.
+RSK04,Lack of Multi-Factor Authentication on VPN,DEP02,4,4,16,Open,Remote access VPN lacks MFA for contractors and third-party vendors, risking active session hijacking.
+RSK05,Unsecured S3 Bucket containing Employee PII,DEP04,2,5,10,Mitigated,Publicly accessible cloud storage bucket containing employee benefits and tax documents.
+RSK06,Ransomware Attack on Corporate Network,DEP01,4,5,20,Open,Malicious attachments bypassing spam filters leading to lateral movement and enterprise-wide file locking.
+RSK07,Inadequate Business Continuity Plan,DEP06,3,5,15,Open,Disaster recovery procedures for primary data center are outdated and have not been tested under stress scenarios.
+RSK08,Third-Party Vendor Data Breach,DEP05,4,4,16,Open,SaaS billing vendor has weak cybersecurity controls risking leakage of client payment histories.
+RSK09,Insider Threat - Source Code Leakage,DEP02,3,4,12,Mitigated,Lack of code loss prevention controls on developer endpoints allowing code exfiltration to public repositories.
+RSK10,Regulatory Compliance Violations (GDPR),DEP05,3,5,15,Open,Incomplete data inventory mapping leading to non-compliance with EU GDPR data deletion requests.

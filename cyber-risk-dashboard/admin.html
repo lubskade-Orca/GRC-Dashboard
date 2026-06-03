@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis GRC | Administration</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Framework active toggles */
+    .toggle-list {
+      list-style: none;
+    }
+    .toggle-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .toggle-item:last-child {
+      border-bottom: none;
+    }
+    
+    /* Toggle switch design */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 22px;
+    }
+    .switch input { 
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--bg-surface-elevated);
+      transition: .3s;
+      border-radius: 22px;
+      border: 1px solid var(--border-color);
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-secondary);
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: rgba(6, 182, 212, 0.2);
+      border-color: var(--color-accent);
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+      background-color: var(--color-accent);
+    }
+
+    /* Info Alerts */
+    .alert-banner {
+      background-color: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--color-low);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Animation -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <p style="margin-top: 16px; font-weight: 500; font-size: 0.85rem; color: var(--text-secondary); letter-spacing: 0.5px;">SECURING GRC ENCLAVE...</p>
+  </div>
+
+  <div class="app-container">
+    <!-- Sidebar navigation slot -->
+    <div id="sidebar-container"></div>
+
+    <main class="main-content">
+      <!-- Header slot -->
+      <div id="header-container"></div>
+
+      <!-- Success Alert Banner -->
+      <div class="alert-banner" id="success-alert">
+        <strong>Database Sync Success:</strong> Parsed file and synced GRC records locally.
+      </div>
+
+      <!-- Main layouts settings grids -->
+      <section class="charts-grid">
+        <!-- CSV Uploader Panel -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h2 class="chart-title">Dynamic CSV Import System (Local Storage Override)</h2>
+          </div>
+          <div style="flex-grow: 1; display:flex; flex-direction:column; justify-content:space-between;">
+            <div class="filter-group" style="margin-bottom: 20px; width:100%;">
+              <label for="import-csv-target" style="display:block; margin-bottom:8px;">Target Database Register</label>
+              <select id="import-csv-target" class="select-input" style="width:100%;">
+                <option value="risks">Risks Register (risks.csv)</option>
+                <option value="controls">Controls Catalog (controls.csv)</option>
+                <option value="findings">Audit Findings (findings.csv)</option>
+                <option value="departments">Departments Directory (departments.csv)</option>
+              </select>
+            </div>
+
+            <!-- Drag and Drop Dropzone -->
+            <div class="dropzone" id="csv-dropzone" onclick="triggerFileSelect()">
+              <svg class="dropzone-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+              </svg>
+              <h3 class="dropzone-title">Drag &amp; Drop CSV File Here</h3>
+              <p class="dropzone-text">or click to browse your corporate laptop filesystem</p>
+              <input type="file" id="csv-file-selector" style="display:none;" accept=".csv" onchange="handleFileSelected(event)">
+            </div>
+            
+            <p style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">
+              <strong>Note:</strong> File uploading relies on the HTML5 <code>FileReader</code> API. Parsed rows are merged and cached in browser <code>localStorage</code>, which updates all register tables and dashboards without backend reload.
+            </p>
+          </div>
+        </div>
+
+        <!-- Framework Activations / Database Management -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h2 class="chart-title">GRC Controls &amp; Settings</h2>
+          </div>
+          <div style="flex-grow:1; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <h3 style="font-size:0.8rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px; margin-bottom:12px;">Regulatory Frameworks Active</h3>
+              <ul class="toggle-list">
+                <li class="toggle-item">
+                  <span>NIST CSF Compliance Framework</span>
+                  <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                  </label>
+                </li>
+                <li class="toggle-item">
+                  <span>ISO/IEC 27001 Security Standard</span>
+                  <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                  </label>
+                </li>
+                <li class="toggle-item">
+                  <span>AICPA SOC 2 Audit Criteria</span>
+                  <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                  </label>
+                </li>
+                <li class="toggle-item">
+                  <span>CIS Critical Security Controls</span>
+                  <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                  </label>
+                </li>
+              </ul>
+            </div>
+
+            <div style="border-top: 1px solid var(--border-color); padding-top:20px; margin-top:20px;">
+              <h3 style="font-size:0.8rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px; margin-bottom:12px;">Database Systems Control</h3>
+              <button class="btn-primary" onclick="resetDatabase()" style="background:var(--color-critical); width:100%; justify-content:center;">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:16px;height:16px;" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Restore Factory Default Data
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Directories table -->
+        <div class="register-card full-width">
+          <div class="chart-header" style="padding:20px 24px; border-bottom:1px solid var(--border-color);">
+            <h2 class="chart-title">GRC GRC Personnel &amp; User Access Directory</h2>
+          </div>
+          <div class="grc-table-container">
+            <table class="grc-table">
+              <thead>
+                <tr>
+                  <th>Full Name</th>
+                  <th>Email ID</th>
+                  <th>Department</th>
+                  <th>Assigned GRC Role</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight:600;">Jane Doe</td>
+                  <td>jane.doe@aegis.local</td>
+                  <td>Information Security</td>
+                  <td><span class="badge" style="background-color:rgba(59, 130, 246, 0.15); color:var(--color-primary); border: 1px solid rgba(59, 130, 246, 0.3);">GRC Admin</span></td>
+                  <td><span class="pill pill-mitigated">Active</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">John Smith</td>
+                  <td>john.smith@aegis.local</td>
+                  <td>Engineering &amp; DevOps</td>
+                  <td><span class="badge badge-high">Risk Owner</span></td>
+                  <td><span class="pill pill-mitigated">Active</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Sarah Jenkins</td>
+                  <td>sarah.j@aegis.local</td>
+                  <td>Finance &amp; Treasury</td>
+                  <td><span class="badge badge-high">Risk Owner</span></td>
+                  <td><span class="pill pill-mitigated">Active</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Maria Santos</td>
+                  <td>maria.s@aegis.local</td>
+                  <td>Legal &amp; Compliance</td>
+                  <td><span class="badge badge-medium">GRC Auditor</span></td>
+                  <td><span class="pill pill-mitigated">Active</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600;">Robert Chen</td>
+                  <td>robert.c@aegis.local</td>
+                  <td>Human Resources</td>
+                  <td><span class="badge badge-low">Read-Only Analyst</span></td>
+                  <td><span class="pill pill-mitigated">Active</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Inject global layout
+      injectGlobalLayout('GRC Administration Center');
+
+      // Initialize database state
+      await initDatabase();
+
+      // Drag and Drop listeners
+      setupDropzone();
+    });
+
+    function triggerFileSelect() {
+      document.getElementById('csv-file-selector').click();
+    }
+
+    function handleFileSelected(e) {
+      const files = e.target.files;
+      if (files.length > 0) {
+        processCSVFile(files[0]);
+      }
+    }
+
+    function setupDropzone() {
+      const dropzone = document.getElementById('csv-dropzone');
+
+      // Dragover visual indicator
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('dragover');
+      });
+
+      // Handle drop
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          processCSVFile(files[0]);
+        }
+      });
+    }
+
+    /**
+     * Reads and parses GRC CSV uploads locally using FileReader
+     */
+    function processCSVFile(file) {
+      if (!file.name.endsWith('.csv')) {
+        alert("Invalid file format. Please upload standard CSV files.");
+        return;
+      }
+
+      const targetRegister = document.getElementById('import-csv-target').value;
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const text = e.target.result;
+        try {
+          const parsedData = parseCSV(text);
+          if (parsedData.length === 0) {
+            alert("No records parsed. Please verify CSV header and row structures.");
+            return;
+          }
+
+          // Save back into local storage GRC state
+          saveGRCData(targetRegister, parsedData);
+
+          // Render Success Alert
+          const banner = document.getElementById('success-alert');
+          banner.innerHTML = `<strong>Database Import Success!</strong> Imported <strong>${parsedData.length}</strong> rows into the <strong>${targetRegister.toUpperCase()}</strong> registry caches. Changes are live.`;
+          banner.style.display = 'block';
+          
+          // Scroll to top to see success banner
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+
+          // Auto-hide alert after 5s
+          setTimeout(() => {
+            banner.style.display = 'none';
+          }, 5000);
+        } catch (err) {
+          alert("Error parsing CSV data. Please check quote escapes and columns.");
+          console.error(err);
+        }
+      };
+
+      reader.readAsText(file);
+    }
+  </script>
+</body>
+</html>

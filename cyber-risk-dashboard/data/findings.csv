@@ -1,0 +1,9 @@
+FindingID,RiskID,Severity,Status,Description,DueDate
+FND01,RSK01,Critical,Open,Database credentials found in git repositories during static analysis scans.,2026-06-15
+FND02,RSK02,High,Open,Treasury staff failed 40 percent of the simulated phishing training tests.,2026-05-10
+FND03,RSK03,Medium,Open,Legacy API Gateway running TLS 1.0 and 1.1 requires immediate deprecation.,2026-07-01
+FND04,RSK04,Critical,Open,External contractors logging into staging database servers without MFA active.,2026-05-01
+FND05,RSK07,High,Open,DR Plan does not specify recovery time objectives (RTO) for core financial ledger.,2026-08-30
+FND06,RSK08,High,Open,Vendor security compliance certification expired 6 months ago; assessment pending.,2026-04-15
+FND07,RSK10,Medium,Closed,Data inventory mapping completed for marketing department database entities.,2026-03-01
+FND08,RSK06,Critical,Open,Server patching cycle is delayed by an average of 45 days in operational zones.,2026-05-20

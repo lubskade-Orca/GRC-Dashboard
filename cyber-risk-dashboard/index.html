@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis GRC Portal | Authenticate</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Custom cyber particles background for Login */
+    .cyber-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      overflow: hidden;
+      opacity: 0.3;
+    }
+    .grid-lines {
+      width: 200%;
+      height: 200%;
+      background-image: 
+        linear-gradient(rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+      transform: perspective(500px) rotateX(60deg) translateY(-30%);
+      animation: grid-scroll 20s linear infinite;
+    }
+    @keyframes grid-scroll {
+      from { background-position: 0 0; }
+      to { background-position: 0 800px; }
+    }
+  </style>
+</head>
+<body class="login-body">
+  <div class="cyber-bg">
+    <div class="grid-lines"></div>
+  </div>
+
+  <div class="login-card" style="z-index: 2;">
+    <div class="login-header">
+      <svg class="login-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+      </svg>
+      <h1 class="login-title">AEGIS GRC</h1>
+      <p class="login-subtitle">Cyber Risk &amp; Governance Governance Platform</p>
+    </div>
+
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="username">Corporate ID / Email</label>
+        <input type="text" id="username" class="form-input" placeholder="e.g. admin@aegis.local" required value="admin@aegis.local">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" class="form-input" placeholder="••••••••" required value="password123">
+      </div>
+      <button type="submit" class="btn-primary login-btn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="width:18px;height:18px;" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12.228 17.51a8.005 8.005 0 01-.707-1.123 7.997 7.997 0 01-.897-1.847c-.201-.595-.316-1.226-.339-1.874a7.994 7.994 0 01.378-2.651 8.005 8.005 0 011.025-2.083 7.998 7.998 0 011.614-1.792c.628-.485 1.348-.847 2.133-1.058a7.993 7.993 0 012.784.053c.773.197 1.488.544 2.115 1.018a7.998 7.998 0 011.696 1.715 8.005 8.005 0 011.134 2.026 7.998 7.998 0 01.077 2.783 7.993 7.993 0 01-.837 2.226a8.005 8.005 0 01-1.637 1.996c-.66.54-1.42.936-2.247 1.157a7.993 7.993 0 01-2.905-.028 7.998 7.998 0 01-2.23-1.047z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12.228 17.51A7.977 7.977 0 0112 18H5a2 2 0 01-2-2V7a2 2 0 012-2h7c.076 0 .15.006.223.018"></path>
+        </svg>
+        Authenticate Session
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p>Authorized access only. Actions are audited.</p>
+      <p style="margin-top: 6px; color: var(--color-accent);">Reference Date: 2026-05-24</p>
+    </div>
+  </div>
+
+  <script>
+    function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.querySelector('.login-btn');
+      btn.innerHTML = 'Authenticating Secure Node...';
+      btn.disabled = true;
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

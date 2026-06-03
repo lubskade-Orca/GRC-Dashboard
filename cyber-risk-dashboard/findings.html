@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis GRC | Audit Findings</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Loading Animation -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <p style="margin-top: 16px; font-weight: 500; font-size: 0.85rem; color: var(--text-secondary); letter-spacing: 0.5px;">SECURING GRC ENCLAVE...</p>
+  </div>
+
+  <div class="app-container">
+    <!-- Sidebar navigation slot -->
+    <div id="sidebar-container"></div>
+
+    <main class="main-content">
+      <!-- Header slot -->
+      <div id="header-container"></div>
+
+      <!-- Findings summary cards -->
+      <section class="kpi-grid">
+        <div class="kpi-card" data-type="total">
+          <div class="kpi-details">
+            <h3>Total Findings Listed</h3>
+            <div class="kpi-value" id="stats-total-findings">-</div>
+            <div class="kpi-change down">
+              <span>Cumulative Audit Trail</span>
+            </div>
+          </div>
+          <div class="kpi-icon-wrapper">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+          </div>
+        </div>
+
+        <div class="kpi-card" data-type="high" id="kpi-overdue-wrapper">
+          <div class="kpi-details">
+            <h3>Overdue Audit Items</h3>
+            <div class="kpi-value" id="stats-overdue-findings">-</div>
+            <div class="kpi-change" style="color: var(--color-critical)">
+              <span>Exceeded Grace Period</span>
+            </div>
+          </div>
+          <div class="kpi-icon-wrapper">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+        </div>
+
+        <div class="kpi-card" data-type="findings">
+          <div class="kpi-details">
+            <h3>Open Findings</h3>
+            <div class="kpi-value" id="stats-open-findings">-</div>
+            <div class="kpi-change" style="color: var(--color-medium)">
+              <span>Pending Remediation</span>
+            </div>
+          </div>
+          <div class="kpi-icon-wrapper">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          </div>
+        </div>
+
+        <div class="kpi-card" data-type="compliance">
+          <div class="kpi-details">
+            <h3>Resolved / Closed</h3>
+            <div class="kpi-value" id="stats-closed-findings">-</div>
+            <div class="kpi-change down">
+              <span>Risk Remediation Successful</span>
+            </div>
+          </div>
+          <div class="kpi-icon-wrapper">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters Panel -->
+      <section class="filter-bar">
+        <div class="search-input-wrapper">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text" id="finding-search" class="search-input" placeholder="Search findings by ID, Risk ID, or description...">
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-severity">Severity</label>
+          <select id="filter-severity" class="select-input">
+            <option value="All">All Severities</option>
+            <option value="Critical">Critical</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-status">Status</label>
+          <select id="filter-status" class="select-input">
+            <option value="All">All Statuses</option>
+            <option value="Open">Open</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Findings Register Table -->
+      <section class="register-card">
+        <div class="grc-table-container">
+          <table class="grc-table">
+            <thead>
+              <tr>
+                <th style="cursor: pointer;" onclick="toggleSort('FindingID')">Finding ID <span id="sort-FindingID">↕</span></th>
+                <th style="cursor: pointer;" onclick="toggleSort('RiskID')">Risk ID <span id="sort-RiskID">↕</span></th>
+                <th style="cursor: pointer;" onclick="toggleSort('Severity')">Severity <span id="sort-Severity">↕</span></th>
+                <th style="cursor: pointer;" onclick="toggleSort('Description')">Description <span id="sort-Description">↕</span></th>
+                <th style="cursor: pointer;" onclick="toggleSort('DueDate')">Due Date <span id="sort-DueDate">↕</span></th>
+                <th style="cursor: pointer;" onclick="toggleSort('Status')">Status <span id="sort-Status">↕</span></th>
+                <th>Remediation Action</th>
+              </tr>
+            </thead>
+            <tbody id="findings-table-body">
+              <!-- JS Injected rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Table Pagination -->
+        <div class="pagination">
+          <div id="pagination-info">Showing 0-0 of 0 entries</div>
+          <div class="pagination-controls">
+            <button class="pagination-btn" id="prev-page-btn" disabled>Previous</button>
+            <button class="pagination-btn" id="next-page-btn" disabled>Next</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/findings.js"></script>
+</body>
+</html>
