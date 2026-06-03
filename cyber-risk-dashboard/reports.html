@@ -1,8 +1,3 @@
-Here is the complete, updated `reports.html` file.
-
-I have integrated the jsPDF library and replaced the `simulateExport` function with the working version that generates a real, readable PDF layout matching your "Executive Board Briefing" requirements.
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -337,14 +332,14 @@ I have integrated the jsPDF library and replaced the `simulateExport` function w
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', `Aegis_GRC_Export_${type}_2026-05-24.csv`);
+      link.setAttribute('download', `Aegis_GRC_Export_${type}_${new Date().toISOString().split('T')[0]}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
 
     /**
-     * Generates and downloads a real PDF using jsPDF
+     * Generates and downloads a real PDF populated with dynamic tool data
      */
     function simulateExport(format, filename) {
       const overlay = document.getElementById('export-progress-overlay');
@@ -375,27 +370,73 @@ I have integrated the jsPDF library and replaced the `simulateExport` function w
           setTimeout(() => {
             overlay.style.display = 'none';
             
-            // Generate a real PDF document
+            // 1. GATHER DYNAMIC DATA
+            // Get current date
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Extract live scores directly from the animated DOM elements
+            const nistScore = document.getElementById('score-nist').innerText;
+            const isoScore = document.getElementById('score-iso').innerText;
+            const socScore = document.getElementById('score-soc2').innerText;
+            
+            // Extract total counts from the local database state
+            const totalControls = grcData.controls ? grcData.controls.length : 0;
+            const totalRisks = grcData.risks ? grcData.risks.length : 0;
+            const totalFindings = grcData.findings ? grcData.findings.length : 0;
+
+            // 2. GENERATE PDF
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Add content to the PDF
+            // --- Header Section ---
             doc.setFontSize(18);
             doc.setFont("helvetica", "bold");
             doc.text("AEGIS GRC SECURE REPORT EXTRACT", 20, 20);
             
             doc.setFontSize(12);
             doc.setFont("helvetica", "normal");
-            doc.text("Date: 2026-05-24", 20, 30);
+            doc.text(`Date: ${today}`, 20, 30);
             
             doc.line(20, 35, 190, 35); // Horizontal line
             
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
             doc.text("EXECUTIVE BOARD BRIEFING", 20, 45);
+            
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "normal");
             doc.text("This report summarizes top vulnerabilities and cumulative", 20, 55);
             doc.text("compliance standings for senior leadership stakeholders.", 20, 62);
             
-            // Trigger the actual file download
-            doc.save(`${filename}_2026-05-24.pdf`);
+            // --- Dynamic Compliance Section ---
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("Regulatory Compliance Standings", 20, 80);
+            
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "normal");
+            doc.text("• NIST CSF v2.0:", 25, 90);
+            doc.text(nistScore, 75, 90);
+            
+            doc.text("• ISO/IEC 27001:2022:", 25, 98);
+            doc.text(isoScore, 75, 98);
+            
+            doc.text("• AICPA SOC 2 Type II:", 25, 106);
+            doc.text(socScore, 75, 106);
+            
+            // --- Dynamic Inventory Section ---
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("Active Inventory Summary", 20, 125);
+            
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Total Mapped Controls: ${totalControls}`, 25, 135);
+            doc.text(`Active Risks Logged: ${totalRisks}`, 25, 143);
+            doc.text(`Pending Audit Findings: ${totalFindings}`, 25, 151);
+
+            // 3. TRIGGER DOWNLOAD
+            doc.save(`${filename}_${today}.pdf`);
             
           }, 400);
         }
